@@ -33,29 +33,37 @@ ALLOWED_HOSTS = []
 
 
 # Application definition
-
 INSTALLED_APPS = [
     'django.contrib.admin',
     'django.contrib.auth',
+    'mongoengine.django.mongo_auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+]
+
+THIRD_PARTY_APPS = [
     'rest_framework',
     'rest_framework_mongoengine',
-    'mongoengine.django.mongo_auth',
+]
+
+MY_APPS = [
     'planet',
 ]
 
-MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
+INSTALLED_APPS += THIRD_PARTY_APPS + MY_APPS
+
+MIDDLEWARE_CLASSES = [
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.security.SecurityMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 ROOT_URLCONF = 'main.urls'
 
@@ -79,16 +87,7 @@ WSGI_APPLICATION = 'main.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/1.11/ref/settings/#databases
-
-
-#Keeping sqlite3 database only for Django tests
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
-}
+DATABASES = {}
 
 # We define 2 Mongo databases - default (star_wars_api) and test (local)
 MONGODB_DATABASES = {
@@ -106,30 +105,6 @@ MONGODB_DATABASES = {
         "tz_aware": True,
     }
 }
-
-def is_test():
-    """
-    Checks, if we're running the server for real or in unit-test.
-    We might need a better implementation of this function.
-    """
-    if 'test' in sys.argv or 'testserver' in sys.argv:
-        print("Using a test mongo database")
-        return True
-    else:
-        print("Using a default mongo database")
-        return False
-
-if is_test():
-    db = 'test'
-else:
-    db = 'default'
-
-
-mongoengine.connect(
-    db=MONGODB_DATABASES[db]['name'],
-    host=MONGODB_DATABASES[db]['host']
-)
-
 
 # Password validation
 # https://docs.djangoproject.com/en/1.11/ref/settings/#auth-password-validators
@@ -151,16 +126,11 @@ AUTH_PASSWORD_VALIDATORS = [
 
 
 # Keeping django content
-MONGOENGINE_USER_DOCUMENT = 'mongoengine.django.auth.User'
-
-SESSION_ENGINE = 'mongoengine.django.sessions'
-SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'
-
 AUTHENTICATION_BACKENDS = (
     'mongoengine.django.auth.MongoEngineBackend',
-    #'django.contrib.auth.backends.ModelBackend'
 )
 
+# DJANGO REST FRAMEWORK
 DEFAULT_AUTHENTICATION_CLASSES = (
     'rest_framework.authentication.SessionAuthentication',
 )
@@ -168,9 +138,9 @@ DEFAULT_AUTHENTICATION_CLASSES = (
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt-BR'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'America/Sao_Paulo'
 
 USE_I18N = True
 
@@ -188,3 +158,13 @@ STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
+
+# MONGO SETTINGS
+mongoengine.connect(
+    db=MONGODB_DATABASES['default']['name'],
+    host=MONGODB_DATABASES['default']['host']
+)
+
+AUTH_USER_MODEL = 'mongo_auth.MongoUser'
+SESSION_ENGINE = 'mongoengine.django.sessions'
+SESSION_SERIALIZER = 'mongoengine.django.sessions.BSONSerializer'

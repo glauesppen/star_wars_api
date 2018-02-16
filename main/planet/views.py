@@ -13,4 +13,11 @@ class PlanetViewSet(MongoModelViewSet):
     serializer_class = PlanetSerializer
 
     def get_queryset(self):
-        return Planet.objects.all()
+        planetas = Planet.objects.all()
+
+        nome = self.request.query_params.get('nome', None)
+
+        if nome:
+            planetas = planetas.filter(nome__icontains=nome)
+
+        return planetas

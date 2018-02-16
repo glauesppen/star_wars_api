@@ -86,8 +86,13 @@ TEMPLATES = [
 WSGI_APPLICATION = 'main.wsgi.application'
 
 
-# Database
-DATABASES = {}
+# Keeping Django default database for tests
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+    }
+}
 
 # We define 2 Mongo databases - default (star_wars_api) and test (local)
 MONGODB_DATABASES = {
